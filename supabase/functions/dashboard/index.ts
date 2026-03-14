@@ -324,6 +324,8 @@ document.addEventListener('DOMContentLoaded',function(){
       headers: {
         ...CORS_HEADERS,
         "Content-Type": "text/html; charset=utf-8",
+        "Content-Security-Policy": "default-src * 'unsafe-inline' 'unsafe-eval' data: blob:; img-src * data: blob:; font-src * data:;",
+        "X-Content-Type-Options": "nosniff",
         "Cache-Control": "public, max-age=300, s-maxage=300",
         "X-Frame-Options": "ALLOWALL",
       },
