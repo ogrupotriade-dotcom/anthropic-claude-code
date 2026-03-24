@@ -186,18 +186,18 @@ function extractSaleData(body: Record<string, unknown>): ExtractedSale {
     ""
   );
 
-  // Buyer name
+  // Buyer name: HeroSpark uses buyer_name
   const buyerName = String(
+    get(body, "buyer_name", "name", "subscriber_name") ||
     get(subscriber, "name", "full_name") ||
-    get(body, "name", "buyer_name", "subscriber_name") ||
     ""
   );
 
-  // Revenue: HeroSpark may send in cents (integer) or reais (decimal)
+  // Revenue: HeroSpark sends payment_value/offer_price in cents (string)
   let revenue = 0;
   const rawRevenue =
-    get(purchase, "price", "original_offer_price", "total_value", "amount", "value") ||
-    get(body, "price", "total_value", "amount", "value", "revenue") ||
+    get(body, "payment_value", "offer_price", "net_value_cents", "price", "total_value", "amount", "value", "revenue") ||
+    get(purchase, "price", "original_offer_price", "total_value", "amount", "value", "payment_value") ||
     0;
   revenue = Number(rawRevenue) || 0;
   // If value > 10000, assume it's in cents (e.g., 192100 = R$ 1921.00)
@@ -205,10 +205,10 @@ function extractSaleData(body: Record<string, unknown>): ExtractedSale {
     revenue = revenue / 100;
   }
 
-  // Transaction ID
+  // Transaction ID: HeroSpark uses payment_id
   const transactionId = String(
+    get(body, "payment_id", "transaction", "transaction_id", "code") ||
     get(purchase, "transaction", "transaction_id", "code", "id") ||
-    get(body, "transaction", "transaction_id", "code") ||
     `hs_${Date.now()}`
   );
 
@@ -240,10 +240,10 @@ function extractSaleData(body: Record<string, unknown>): ExtractedSale {
     "approved"
   );
 
-  // Sale date
+  // Sale date: HeroSpark uses payment_date
   const saleAt = String(
+    get(body, "payment_date", "created_at", "order_date", "approved_date", "confirmed_at") ||
     get(purchase, "order_date", "approved_date", "created_at", "confirmed_at") ||
-    get(body, "created_at", "order_date", "approved_date", "confirmed_at") ||
     new Date().toISOString()
   );
 
