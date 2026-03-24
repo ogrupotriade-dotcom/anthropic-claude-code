@@ -94,9 +94,12 @@ function K(c,l,v,s){return'<div class="kpi" style="border-top-color:var(--'+c+')
 /* ===== VISAO GERAL - Funil de Vendas ===== */
 function rO(){
 var md=fd(D.meta.daily,'d'),gd=fd(D.ga4.daily,'date'),ig=fd(D.ig.daily,'date');
-var ms=sm(md,'spend'),mi=sm(md,'impr'),mr=sm(md,'reach'),mc2=sm(md,'clicks'),ml=sm(md,'leads'),mp=sm(md,'purch'),mrev=sm(md,'rev');
+var ms=sm(md,'spend'),mi=sm(md,'impr'),mr=sm(md,'reach'),mc2=sm(md,'clicks'),mrev=sm(md,'rev');
 var ss=sm(gd,'sessions'),nu=sm(gd,'new_users');
 var ir=sm(ig,'reach'),iv=sm(ig,'views'),ii=sm(ig,'total_interactions');
+var c=co();var ml=fd(D.leads||[],'lead_captured_at').length;
+var salesF=fd(D.sales||[],'sale_at');var mp=salesF.length;var srev=sm(salesF,'revenue');
+if(srev>0)mrev=srev;
 var cpl=ml>0?ms/ml:0,cpa=mp>0?ms/mp:0,roas=ms>0?mrev/ms:0;
 var clickToSession=mc2>0?(ss/mc2*100):0;
 var sessionToLead=ss>0?(ml/ss*100):0;
