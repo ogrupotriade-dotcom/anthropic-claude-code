@@ -23,11 +23,20 @@ function errorPage(msg: string): Response {
 
 // Build the dashboard data object by querying all tables directly
 async function buildDashboardData(sb: ReturnType<typeof createClient>): Promise<Record<string, unknown>> {
-  // Meta Ads daily (filter level='ad' to avoid triple counting)
-  const { data: metaDaily } = await sb
+  // Meta Ads daily - use ad level where available, campaign level as fallback
+  // First get ad-level data
+  const { data: metaAd } = await sb
     .from("bi_meta_insights")
-    .select("date_start, spend, impressions, reach, clicks, leads, purchases, revenue")
+    .select("date_start, spend, impressions, reach, clicks, leads, purchases, purchase_value")
     .eq("level", "ad");
+  // Get campaign-level data for dates not covered by ad-level
+  const adDates = new Set((metaAd || []).map((r) => r.date_start));
+  const { data: metaCampaign } = await sb
+    .from("bi_meta_insights")
+    .select("date_start, spend, impressions, reach, clicks, leads, purchases, purchase_value")
+    .eq("level", "campaign");
+  const campaignOnly = (metaCampaign || []).filter((r) => !adDates.has(r.date_start));
+  const metaDaily = [...(metaAd || []), ...campaignOnly];
 
   // Aggregate meta daily by date
   const metaDailyMap = new Map<string, Record<string, number>>();
@@ -40,7 +49,7 @@ async function buildDashboardData(sb: ReturnType<typeof createClient>): Promise<
     cur.clicks += Number(row.clicks) || 0;
     cur.leads += Number(row.leads) || 0;
     cur.purch += Number(row.purchases) || 0;
-    cur.rev += Number(row.revenue) || 0;
+    cur.rev += Number(row.purchase_value) || 0;
     metaDailyMap.set(d, cur);
   }
   const metaDailyArr = Array.from(metaDailyMap.entries())
@@ -60,11 +69,11 @@ async function buildDashboardData(sb: ReturnType<typeof createClient>): Promise<
     campaignMap.set(name, cur);
   }
 
-  // Refetch with campaign_name included
+  // Refetch with campaign_name included (use campaign level for complete data)
   const { data: metaWithCampaign } = await sb
     .from("bi_meta_insights")
     .select("campaign_name, spend, impressions, clicks, leads, purchases")
-    .eq("level", "ad");
+    .eq("level", "campaign");
 
   const campaignMap2 = new Map<string, Record<string, number>>();
   for (const row of metaWithCampaign || []) {
