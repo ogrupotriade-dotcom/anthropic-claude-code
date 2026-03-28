@@ -237,6 +237,14 @@ async function buildDashboardData(sb: ReturnType<typeof createClient>): Promise<
     sales: (sales || []).map((r) => ({
       revenue: Number(r.revenue) || 0,
       sale_at: r.sale_at || "",
+      email: r.email || "",
+      buyer_name: r.buyer_name || "",
+      product_name: r.product_name || "",
+      lead_id: r.lead_id || null,
+      utm_source: r.utm_source || "",
+      utm_medium: r.utm_medium || "",
+      utm_campaign: r.utm_campaign || "",
+      status: r.status || "",
     })),
     survey: {
       total: (surveyRows || []).length,

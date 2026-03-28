@@ -274,10 +274,23 @@ e.innerHTML=h}
 function rL(){
 var e=document.getElementById('tab-leads');var leads=D.leads||[];var sales=D.sales||[];
 var real=leads.filter(function(l){return l.email&&!(l.name||'').match(/teste/i)});
-var h='<div class="kg">'+K('green','Total Leads',String(leads.length),real.length+' reais')+K('pink','Vendas',String(sales.length))+K('orange','Receita',sales.length>0?fR(sm(sales,'revenue')):'-')+'</div>';
-h+='<div class="card"><div class="ct">Leads Capturados</div><div class="tbl"><table><thead><tr><th>Nome</th><th>Email</th><th>Origem</th><th>Campanha</th><th>Device</th><th>Data</th></tr></thead><tbody>';
+var converted=sales.filter(function(s){return s.email});
+var convEmails={};converted.forEach(function(s){convEmails[s.email]=s});
+var convRate=real.length>0?(converted.length/real.length*100):0;
+var h='<div class="kg">'+K('green','Total Leads',String(leads.length),real.length+' reais')+K('pink','Vendas',String(sales.length),convRate>0?'Taxa: '+convRate.toFixed(1)+'%':'-')+K('orange','Receita',sales.length>0?fR(sm(sales,'revenue')):'-')+'</div>';
+
+/* Tabela de Vendas com atribuição */
+h+='<div class="card"><div class="ct">Vendas Realizadas</div><div class="tbl"><table><thead><tr><th>Comprador</th><th>Email</th><th>Produto</th><th class="r">Receita</th><th>Origem</th><th>Campanha</th><th>Data Venda</th></tr></thead><tbody>';
+sales.forEach(function(s){var dt=s.sale_at?new Date(s.sale_at).toLocaleDateString('pt-BR'):'-';
+h+='<tr style="background:rgba(236,72,153,.05)"><td class="n">'+esc(s.buyer_name||'-')+'</td><td class="m">'+esc(s.email||'-')+'</td><td class="n">'+esc(s.product_name||'-')+'</td><td class="r m" style="color:var(--green);font-weight:600">'+fR(s.revenue)+'</td><td>'+esc((s.utm_source||'-')+'/'+(s.utm_medium||'-'))+'</td><td class="n">'+esc(s.utm_campaign||'-')+'</td><td class="m">'+dt+'</td></tr>'});
+h+='</tbody></table></div></div>';
+
+/* Tabela de Leads com status de conversão */
+h+='<div class="card"><div class="ct">Leads Capturados</div><div class="tbl"><table><thead><tr><th>Status</th><th>Nome</th><th>Email</th><th>Origem</th><th>Campanha</th><th>Device</th><th>Data Lead</th></tr></thead><tbody>';
 leads.forEach(function(l){var dt=l.lead_captured_at?new Date(l.lead_captured_at).toLocaleDateString('pt-BR'):'-';
-h+='<tr><td class="n">'+esc(l.name||'-')+'</td><td class="m">'+esc(l.email||'-')+'</td><td>'+esc((l.utm_source||'-')+'/'+(l.utm_medium||'-'))+'</td><td class="n">'+esc(l.utm_campaign||'-')+'</td><td>'+esc(l.device||'-')+'</td><td class="m">'+dt+'</td></tr>'});
+var isSale=convEmails[l.email];var badge=isSale?'<span style="background:var(--pink);color:#fff;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600">COMPROU</span>':'<span style="background:rgba(100,116,139,.2);color:#94a3b8;padding:2px 8px;border-radius:10px;font-size:11px">Lead</span>';
+var rowBg=isSale?' style="background:rgba(16,185,129,.06)"':'';
+h+='<tr'+rowBg+'><td>'+badge+'</td><td class="n">'+esc(l.name||'-')+'</td><td class="m">'+esc(l.email||'-')+'</td><td>'+esc((l.utm_source||'-')+'/'+(l.utm_medium||'-'))+'</td><td class="n">'+esc(l.utm_campaign||'-')+'</td><td>'+esc(l.device||'-')+'</td><td class="m">'+dt+'</td></tr>'});
 h+='</tbody></table></div></div>';e.innerHTML=h}
 
 var TABS=['overview','meta','website','ig','survey','leads'];

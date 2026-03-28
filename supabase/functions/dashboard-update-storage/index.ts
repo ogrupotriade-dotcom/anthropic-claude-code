@@ -137,7 +137,7 @@ async function buildDashboardData(sb: ReturnType<typeof createClient>): Promise<
       posts: (igPosts || []).map((r) => ({ media_type: r.media_type || "IMAGE", caption: r.caption || "", reach: Number(r.reach) || 0, views: Number(r.views || r.impressions) || 0, like_count: Number(r.like_count || r.likes) || 0, saves: Number(r.saves) || 0, total_interactions: Number(r.total_interactions) || 0 })),
     },
     leads: (leads || []).map((r) => ({ name: r.name || "", email: r.email || "", utm_source: r.utm_source || "", utm_medium: r.utm_medium || "", utm_campaign: r.utm_campaign || "", device: r.device || "", lead_captured_at: r.lead_captured_at || "" })),
-    sales: (sales || []).map((r) => ({ revenue: Number(r.revenue) || 0, sale_at: r.sale_at || "" })),
+    sales: (sales || []).map((r) => ({ revenue: Number(r.revenue) || 0, sale_at: r.sale_at || "", email: r.email || "", buyer_name: r.buyer_name || "", product_name: r.product_name || "", lead_id: r.lead_id || null, utm_source: r.utm_source || "", utm_medium: r.utm_medium || "", utm_campaign: r.utm_campaign || "", status: r.status || "" })),
     survey: { total: (surveyRows || []).length, questions: surveyQuestions, distributions },
   };
 }
